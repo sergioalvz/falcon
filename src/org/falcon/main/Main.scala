@@ -41,11 +41,7 @@ object Main {
       println("| 0. Stop & Exit |")
       println(" ---------------- ")
 
-      Iterator.continually(Console.readLine()).takeWhile(_ != "0").foreach(line => {
-        println(" ---------------- ")
-        println("| 0. Stop & Exit |")
-        println(" ---------------- ")
-      })
+      Iterator.continually(Console.readLine()).takeWhile(_ != "0").foreach(line => println("Press 0 for Stop & Exit"))
 
       twitterStreaming.close()
 
