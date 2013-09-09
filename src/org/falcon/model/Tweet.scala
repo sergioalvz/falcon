@@ -7,7 +7,7 @@ package org.falcon.model
  * Author: Sergio Álvarez
  * Date: 09/2013
  */
-class Tweet(username: String, location: String, latitude: String, longitude: String, text: String) {
+class Tweet(username: String, location: String, timezone: String, latitude: String, longitude: String, text: String) {
   def toXML =
     <tweet>
       <username>
@@ -16,6 +16,9 @@ class Tweet(username: String, location: String, latitude: String, longitude: Str
       <location>
         {location}
       </location>
+      <timezone>
+        {timezone}
+      </timezone>
       <latitude>
         {latitude}
       </latitude>

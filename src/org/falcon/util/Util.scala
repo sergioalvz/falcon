@@ -1,7 +1,7 @@
 package org.falcon.util
 
 import java.util.Properties
-import twitter4j.conf.{Configuration, ConfigurationBuilder}
+import twitter4j.conf.Configuration
 import java.io.FileInputStream
 
 /**
