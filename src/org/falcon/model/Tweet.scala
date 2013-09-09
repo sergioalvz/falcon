@@ -9,11 +9,21 @@ package org.falcon.model
  */
 class Tweet(username: String, location: String, latitude: String, longitude: String, text: String) {
   def toXML =
-              <tweet>
-                <username>{username}</username>
-                <location>{location}</location>
-                <latitude>{latitude}</latitude>
-                <longitude>{longitude}</longitude>
-                <text>{text}</text>
-              </tweet>
+    <tweet>
+      <username>
+        {username}
+      </username>
+      <location>
+        {location}
+      </location>
+      <latitude>
+        {latitude}
+      </latitude>
+      <longitude>
+        {longitude}
+      </longitude>
+      <text>
+        {text}
+      </text>
+    </tweet>
 }

@@ -12,14 +12,14 @@ import java.io.{PrintWriter, BufferedWriter, FileWriter}
 object Writer {
   private var writer: PrintWriter = null
 
-  def open(file: String) = if(writer != null) writer = new PrintWriter(new BufferedWriter(new FileWriter(file, true)))
+  def open(file: String) = if (writer == null) writer = new PrintWriter(new BufferedWriter(new FileWriter(file, true)))
 
   def close() = {
-    if(writer != null) {
+    if (writer != null) {
       writer.close()
       writer = null
     }
   }
 
-  def write(string: String) = if(writer != null) writer.println(string)
+  def write(string: String) = if (writer != null) writer.println(string)
 }
