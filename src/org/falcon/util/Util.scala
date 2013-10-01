@@ -3,6 +3,7 @@ package org.falcon.util
 import java.util.Properties
 import twitter4j.conf.Configuration
 import java.io.FileInputStream
+import scala.io.Source
 
 /**
  * Project: falcon
@@ -26,4 +27,6 @@ object Util {
       .setOAuthAccessTokenSecret(properties.getProperty("access_token_secret"))
       .build
   }
+
+  def spanishStopWords: Array[String] = Source.fromFile("spanish-stop-words.txt").getLines().toArray
 }
