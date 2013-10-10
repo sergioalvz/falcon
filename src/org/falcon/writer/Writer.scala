@@ -1,6 +1,7 @@
 package org.falcon.writer
 
-import java.io.{PrintWriter, BufferedWriter, FileWriter}
+import java.io._
+import java.nio.charset.Charset
 
 /**
  * Project: falcon
@@ -10,9 +11,10 @@ import java.io.{PrintWriter, BufferedWriter, FileWriter}
  * Date: 09/2013
  */
 object Writer {
-  private var writer: PrintWriter = null
+  private var writer: BufferedWriter = null
 
-  def open(file: String) = if (writer == null) writer = new PrintWriter(new BufferedWriter(new FileWriter(file, true)))
+  def open(file: String) = if (writer == null) writer = new BufferedWriter(new OutputStreamWriter(
+    new FileOutputStream(file, true), Charset.forName("UTF-8").newEncoder()))
 
   def close() = {
     if (writer != null) {
@@ -21,5 +23,10 @@ object Writer {
     }
   }
 
-  def write(string: String) = if (writer != null) writer.println(string)
+  def write(string: String) = {
+    if (writer != null) {
+      writer.flush()
+      writer.write(string)
+    }
+  }
 }
