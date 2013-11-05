@@ -14,11 +14,9 @@ import scala.io.Source
  */
 object Util {
 
-  def config: Configuration = {
-    val in = new FileInputStream("twitter.properties")
+  def twitterConfiguration: Configuration = {
     val properties = new Properties()
-    properties.load(in)
-    in.close()
+    properties.load(Util.getClass.getResourceAsStream("/twitter.properties"))
 
     new twitter4j.conf.ConfigurationBuilder()
       .setOAuthConsumerKey(properties.getProperty("consumer_key"))
@@ -28,5 +26,11 @@ object Util {
       .build
   }
 
-  def spanishStopWords: Array[String] = Source.fromFile("spanish-stop-words.txt").getLines().toArray
+  private def stopWordsFile: String = {
+    val properties = new Properties()
+    properties.load(Util.getClass.getResourceAsStream("/configuration.properties"))
+    properties.getProperty("stop_words_file")
+  }
+
+  def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
 }
