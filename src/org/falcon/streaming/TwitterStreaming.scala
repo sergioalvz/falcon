@@ -17,9 +17,9 @@ class TwitterStreaming(fileName: String) {
   private var twitter: TwitterStream = _
 
   def run() = {
-    twitter = new TwitterStreamFactory(Util.config).getInstance()
+    twitter = new TwitterStreamFactory(Util.twitterConfiguration).getInstance()
     twitter.addListener(myTwitterStatusListener)
-    twitter.filter(new FilterQuery().language(Array("es")).track(Util.spanishStopWords))
+    twitter.filter(new FilterQuery().language(Array("en")).track(Util.stopWords))
   }
 
   def close() = {
@@ -30,19 +30,22 @@ class TwitterStreaming(fileName: String) {
 
   private def myTwitterStatusListener = new StatusListener {
     def onStatus(status: Status) {
-      if (status.getGeoLocation != null) {
         val username: String = status.getUser.getScreenName
         val location: String = status.getUser.getLocation
         val timezone: String = status.getUser.getTimeZone
-        val latitude: String = status.getGeoLocation.getLatitude.toString
-        val longitude: String = status.getGeoLocation.getLongitude.toString
         val text: String = status.getText
+
+        var latitude: String = ""
+        var longitude: String = ""
+        if(status.getGeoLocation != null){
+          latitude = status.getGeoLocation.getLatitude.toString
+          longitude = status.getGeoLocation.getLongitude.toString
+        }
 
         val tweet = new Tweet(username, location, timezone, latitude, longitude, text)
         Writer.open(fileName)
         Writer.write(tweet.toXML.toString())
         Writer.close()
-      }
     }
 
     def onStallWarning(p1: StallWarning) {}
