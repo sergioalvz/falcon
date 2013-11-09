@@ -1,7 +1,10 @@
 falcon
 ======
 
-The **falcon** project is an Open Source project focused on XML storing large collections of tweets from the Twitter
-Streaming API.
+The **falcon** project is a tweets' collecter based on Scala.
 
 This project is part of the Sergio Álvarez's Master Thesis about based-content tweets' geolocation.
+
+Other related modules:
+
++ [puma](https://github.com/sergio-alvarez/puma)
