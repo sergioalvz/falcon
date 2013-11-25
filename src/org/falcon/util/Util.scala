@@ -4,6 +4,7 @@ import java.util.Properties
 import twitter4j.conf.Configuration
 import java.io.FileInputStream
 import scala.io.Source
+import scala.Array
 
 /**
  * Project: falcon
@@ -33,4 +34,20 @@ object Util {
   }
 
   def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
+
+  def locations: Array[Array[Double]] = {
+    val properties = new Properties()
+    properties.load(Util.getClass.getResourceAsStream("/configuration.properties"))
+    val boundingBoxesString = properties.getProperty("bounding_boxes")
+
+    val boundingBoxes = boundingBoxesString.split("@@")
+    val locations = Array.ofDim[Double](boundingBoxes.size, 2)
+
+    for(i <- 0 to boundingBoxes.length -1 ){
+      val coordinates = boundingBoxes(i).split(",")
+      locations(i) = Array(coordinates(0).toDouble, coordinates(1).toDouble)
+    }
+
+    locations
+  }
 }

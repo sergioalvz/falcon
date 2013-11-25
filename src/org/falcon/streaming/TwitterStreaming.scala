@@ -19,7 +19,7 @@ class TwitterStreaming(fileName: String) {
   def run() = {
     twitter = new TwitterStreamFactory(Util.twitterConfiguration).getInstance()
     twitter.addListener(myTwitterStatusListener)
-    twitter.filter(new FilterQuery().language(Array("en")).track(Util.stopWords))
+    twitter.filter(new FilterQuery().locations(Util.locations))
   }
 
   def close() = {
