@@ -30,17 +30,12 @@ class TwitterStreaming(fileName: String) {
 
   private def myTwitterStatusListener = new StatusListener {
     def onStatus(status: Status) {
-        val username: String = status.getUser.getScreenName
-        val location: String = status.getUser.getLocation
-        val timezone: String = status.getUser.getTimeZone
-        val text: String = status.getText
-
-        var latitude: String = ""
-        var longitude: String = ""
-        if(status.getGeoLocation != null){
-          latitude = status.getGeoLocation.getLatitude.toString
-          longitude = status.getGeoLocation.getLongitude.toString
-        }
+        val username: String  = status.getUser.getScreenName
+        val location: String  = status.getUser.getLocation
+        val timezone: String  = status.getUser.getTimeZone
+        val text: String      = status.getText
+        val latitude: String  = if(status.getGeoLocation != null) status.getGeoLocation.getLatitude.toString else ""
+        val longitude: String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
 
         val tweet = new Tweet(username, location, timezone, latitude, longitude, text)
         Writer.open(fileName)

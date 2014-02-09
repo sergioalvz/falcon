@@ -13,20 +13,18 @@ import java.nio.charset.Charset
 object Writer {
   private var writer: BufferedWriter = null
 
-  def open(file: String) = if (writer == null) writer = new BufferedWriter(new OutputStreamWriter(
-    new FileOutputStream(file, true), Charset.forName("UTF-8").newEncoder()))
-
-  def close() = {
-    if (writer != null) {
-      writer.close()
-      writer = null
+  def open(file: String) ={
+    if (writer == null){
+      val charset = Charset.forName("UTF-8").newEncoder()
+      writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), charset))
     }
   }
 
+  def close() = {
+    if (writer != null) { writer.close(); writer = null }
+  }
+
   def write(string: String) = {
-    if (writer != null) {
-      writer.flush()
-      writer.write(string)
-    }
+    if (writer != null) { writer.flush(); writer.write(string) }
   }
 }
