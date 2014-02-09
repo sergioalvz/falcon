@@ -2,9 +2,9 @@ package org.falcon.util
 
 import java.util.Properties
 import twitter4j.conf.Configuration
-import java.io.FileInputStream
 import scala.io.Source
 import scala.Array
+import org.falcon.streaming.filter.Filter
 
 /**
  * Project: falcon
@@ -15,39 +15,67 @@ import scala.Array
  */
 object Util {
 
+  private[this] val LanguagePropertyKey             = "language"
+  private[this] val BoundingBoxesPropertyKey        = "bounding_boxes"
+  private[this] val StopWordsFilePropertyKey        = "stop_words_file"
+  private[this] val FilterPropertyKey               = "filter"
+  private[this] val ConfigurationPropertiesFileName = "configuration.properties"
+
+  private[this] val AccessTokenSecretPropertyKey    = "access_token_secret"
+  private[this] val AccessTokenPropertyKey          = "access_token"
+  private[this] val ConsumerSecretPropertyKey       = "consumer_secret"
+  private[this] val ConsumerKeyPropertyKey          = "consumer_key"
+  private[this] val TwitterPropertiesFileName       = "/twitter.properties"
+
   def twitterConfiguration: Configuration = {
     val properties = new Properties()
-    properties.load(Util.getClass.getResourceAsStream("/twitter.properties"))
+    properties.load(Util.getClass.getResourceAsStream(TwitterPropertiesFileName))
 
     new twitter4j.conf.ConfigurationBuilder()
-      .setOAuthConsumerKey(properties.getProperty("consumer_key"))
-      .setOAuthConsumerSecret(properties.getProperty("consumer_secret"))
-      .setOAuthAccessToken(properties.getProperty("access_token"))
-      .setOAuthAccessTokenSecret(properties.getProperty("access_token_secret"))
+      .setOAuthConsumerKey(properties.getProperty(ConsumerKeyPropertyKey))
+      .setOAuthConsumerSecret(properties.getProperty(ConsumerSecretPropertyKey))
+      .setOAuthAccessToken(properties.getProperty(AccessTokenPropertyKey))
+      .setOAuthAccessTokenSecret(properties.getProperty(AccessTokenSecretPropertyKey))
       .build
   }
 
-  private def stopWordsFile: String = {
+  def filter:Filter = {
     val properties = new Properties()
-    properties.load(Util.getClass.getResourceAsStream("/configuration.properties"))
-    properties.getProperty("stop_words_file")
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    Class.forName(properties.getProperty(FilterPropertyKey)).newInstance().asInstanceOf[Filter]
   }
 
+  private[this] def stopWordsFile: String = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    properties.getProperty(StopWordsFilePropertyKey)
+  }
   def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
 
   def locations: Array[Array[Double]] = {
     val properties = new Properties()
-    properties.load(Util.getClass.getResourceAsStream("/configuration.properties"))
-    val boundingBoxesString = properties.getProperty("bounding_boxes")
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    val boundingBoxesString = properties.getProperty(BoundingBoxesPropertyKey)
 
     val boundingBoxes = boundingBoxesString.split("@@")
     val locations = Array.ofDim[Double](boundingBoxes.size, 2)
 
-    for(i <- 0 to boundingBoxes.length -1 ){
-      val coordinates = boundingBoxes(i).split(",")
-      locations(i) = Array(coordinates(0).toDouble, coordinates(1).toDouble)
-    }
+    boundingBoxes.indices.foreach(index => {
+      val coordinates = boundingBoxes(index).split(",")
+      locations(index) = Array(coordinates(0).toDouble, coordinates(1).toDouble)
+    })
 
     locations
+  }
+
+  def language:Array[String] = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    Array(properties.getProperty(LanguagePropertyKey))
+  }
+
+  def getExecutableAbsolutePath: String = {
+    val absolutePath = Util.getClass.getProtectionDomain.getCodeSource.getLocation.getPath
+    absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1)
   }
 }
