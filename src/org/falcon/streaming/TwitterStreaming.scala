@@ -22,11 +22,7 @@ class TwitterStreaming(fileName: String) {
     twitter.filter(Util.filter.filterQuery)
   }
 
-  def close() = {
-    if (twitter != null) {
-      twitter.shutdown()
-    }
-  }
+  def close() = if (twitter != null) twitter.shutdown()
 
   private def myTwitterStatusListener = new StatusListener {
     def onStatus(status: Status) {
@@ -38,9 +34,7 @@ class TwitterStreaming(fileName: String) {
         val longitude: String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
 
         val tweet = new Tweet(username, location, timezone, latitude, longitude, text)
-        Writer.open(fileName)
         Writer.write(s"\t${tweet.toXML.toString()}\n")
-        Writer.close()
     }
 
     def onStallWarning(p1: StallWarning) {}

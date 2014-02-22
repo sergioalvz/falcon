@@ -29,20 +29,17 @@ object Main {
     println()
     println(s"File to save the collection: $fileName")
 
-    var twitterStreaming: TwitterStreaming = null
+    val twitterStreaming = new TwitterStreaming(fileName)
 
     try {
       Writer.open(fileName)
       Writer.write("<tweets>\n")
-      Writer.close()
-
-      twitterStreaming = new TwitterStreaming(fileName)
       twitterStreaming.run()
+
       val top = System.currentTimeMillis() + Util.timeToCollect
       while(System.currentTimeMillis() <= top) {}
-      twitterStreaming.close()
 
-      Writer.open(fileName)
+      twitterStreaming.close()
       Writer.write("</tweets>")
       Writer.close()
     } catch {
