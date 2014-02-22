@@ -4,6 +4,7 @@ import scala.Console
 import java.io.IOException
 import org.falcon.writer.Writer
 import org.falcon.streaming.TwitterStreaming
+import org.falcon.util.Util
 
 /**
  * Project: falcon
@@ -14,10 +15,11 @@ import org.falcon.streaming.TwitterStreaming
  */
 object Main {
   def main(args: Array[String]) = {
-    if (!(args.length > 0))
+    val fileName = Util.fileName
+    if (fileName.isEmpty)
       Console.err.println("ERROR: Must be provided a file where to save the tweets' collection")
     else
-      run(args(0))
+      run(fileName)
   }
 
   def run(fileName: String) = {
@@ -25,24 +27,19 @@ object Main {
     println("                 falcon                 ")
     println("========================================")
     println()
-    println("File to save the collection: " + fileName)
+    println(s"File to save the collection: $fileName")
 
     var twitterStreaming: TwitterStreaming = null
 
     try {
       Writer.open(fileName)
-      Writer.write("<tweets>")
+      Writer.write("<tweets>\n")
       Writer.close()
 
       twitterStreaming = new TwitterStreaming(fileName)
       twitterStreaming.run()
-
-      println(" ---------------- ")
-      println("| 0. Stop & Exit |")
-      println(" ---------------- ")
-
-      Iterator.continually(Console.readLine()).takeWhile(_ != "0").foreach(line => println("Press 0 for Stop & Exit"))
-
+      val top = System.currentTimeMillis() + Util.timeToCollect
+      while(System.currentTimeMillis() <= top) {}
       twitterStreaming.close()
 
       Writer.open(fileName)
@@ -50,7 +47,7 @@ object Main {
       Writer.close()
     } catch {
       case ex: IOException => {
-        Console.err.println("ERROR: " + ex.getMessage + ". The file might be corrupted.")
+        Console.err.println(s"ERROR: ${ex.getMessage}. The file might be corrupted.")
       }
     } finally {
       Writer.close()

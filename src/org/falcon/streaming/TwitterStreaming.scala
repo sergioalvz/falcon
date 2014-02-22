@@ -39,7 +39,7 @@ class TwitterStreaming(fileName: String) {
 
         val tweet = new Tweet(username, location, timezone, latitude, longitude, text)
         Writer.open(fileName)
-        Writer.write(tweet.toXML.toString())
+        Writer.write(s"\t${tweet.toXML.toString()}\n")
         Writer.close()
     }
 

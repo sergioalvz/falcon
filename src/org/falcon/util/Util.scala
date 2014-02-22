@@ -5,6 +5,8 @@ import twitter4j.conf.Configuration
 import scala.io.Source
 import scala.Array
 import org.falcon.streaming.filter.Filter
+import scala.concurrent.duration._
+import java.util.concurrent.TimeUnit
 
 /**
  * Project: falcon
@@ -19,6 +21,9 @@ object Util {
   private[this] val BoundingBoxesPropertyKey        = "bounding_boxes"
   private[this] val StopWordsFilePropertyKey        = "stop_words_file"
   private[this] val FilterPropertyKey               = "filter"
+  private[this] val TimeToCollectPropertyKey        = "time_to_collect"
+  private[this] val TimeInPropertyKey               = "time_in"
+  private[this] val FileNamePropertyKey             = "file_name"
   private[this] val ConfigurationPropertiesFileName = "configuration.properties"
 
   private[this] val AccessTokenSecretPropertyKey    = "access_token_secret"
@@ -77,5 +82,19 @@ object Util {
   def getExecutableAbsolutePath: String = {
     val absolutePath = Util.getClass.getProtectionDomain.getCodeSource.getLocation.getPath
     absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1)
+  }
+
+  def timeToCollect: Long = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    val timeMeasure = properties.getProperty(TimeInPropertyKey)
+    val timeToCollect = properties.getProperty(TimeToCollectPropertyKey).toDouble
+    Duration(timeToCollect, TimeUnit.valueOf(timeMeasure)).toMillis
+  }
+
+  def fileName: String = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    properties.getProperty(FileNamePropertyKey)
   }
 }
