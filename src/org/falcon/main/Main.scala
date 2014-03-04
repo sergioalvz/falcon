@@ -1,10 +1,6 @@
 package org.falcon.main
 
-import scala.Console
-import java.io.IOException
-import org.falcon.writer.Writer
-import org.falcon.streaming.TwitterStreaming
-import org.falcon.util.Util
+import org.falcon.streaming.Collector
 
 /**
  * Project: falcon
@@ -15,40 +11,16 @@ import org.falcon.util.Util
  */
 object Main {
   def main(args: Array[String]) = {
-    val fileName = Util.fileName
-    if (fileName.isEmpty)
-      Console.err.println("ERROR: Must be provided a file where to save the tweets' collection")
-    else
-      run(fileName)
+    run()
   }
 
-  def run(fileName: String) = {
+  def run() = {
     println("========================================")
     println("                 falcon                 ")
     println("========================================")
     println()
-    println(s"File to save the collection: $fileName")
 
-    val twitterStreaming = new TwitterStreaming(fileName)
-
-    try {
-      Writer.open(fileName)
-      Writer.write("<tweets>\n")
-      twitterStreaming.run()
-
-      val top = System.currentTimeMillis() + Util.timeToCollect
-      while(System.currentTimeMillis() <= top) {}
-
-      twitterStreaming.close()
-      Writer.write("</tweets>")
-      Writer.close()
-    } catch {
-      case ex: IOException => {
-        Console.err.println(s"ERROR: ${ex.getMessage}. The file might be corrupted.")
-      }
-    } finally {
-      Writer.close()
-      twitterStreaming.close()
-    }
+    val collector = new Collector()
+    collector.collect
   }
 }

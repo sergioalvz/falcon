@@ -4,9 +4,10 @@ import java.util.Properties
 import twitter4j.conf.Configuration
 import scala.io.Source
 import scala.Array
-import org.falcon.streaming.filter.Filter
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
+import scala.collection.mutable
 
 /**
  * Project: falcon
@@ -17,10 +18,11 @@ import java.util.concurrent.TimeUnit
  */
 object Util {
 
-  private[this] val LanguagePropertyKey             = "language"
-  private[this] val BoundingBoxesPropertyKey        = "bounding_boxes"
+  val LanguagePropertyKey      = "filter_language"
+  val BoundingBoxesPropertyKey = "filter_bounding_boxes"
+
+  private[this] val CoordinatesMandatoryPropertyKey = "coordinates_mandatory"
   private[this] val StopWordsFilePropertyKey        = "stop_words_file"
-  private[this] val FilterPropertyKey               = "filter"
   private[this] val TimeToCollectPropertyKey        = "time_to_collect"
   private[this] val TimeInPropertyKey               = "time_in"
   private[this] val FileNamePropertyKey             = "file_name"
@@ -42,12 +44,6 @@ object Util {
       .setOAuthAccessToken(properties.getProperty(AccessTokenPropertyKey))
       .setOAuthAccessTokenSecret(properties.getProperty(AccessTokenSecretPropertyKey))
       .build
-  }
-
-  def filter:Filter = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    Class.forName(properties.getProperty(FilterPropertyKey)).newInstance().asInstanceOf[Filter]
   }
 
   private[this] def stopWordsFile: String = {
@@ -96,5 +92,17 @@ object Util {
     val properties = new Properties()
     properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
     properties.getProperty(FileNamePropertyKey)
+  }
+
+  def filterProperties: Set[String] = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    properties.stringPropertyNames.asScala.filter(property => property.startsWith("filter_")).toSet
+  }
+
+  def areCoordinatesMandatory: Boolean = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    properties.getProperty(CoordinatesMandatoryPropertyKey) == "true"
   }
 }
