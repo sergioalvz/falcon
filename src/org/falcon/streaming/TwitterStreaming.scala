@@ -39,10 +39,10 @@ class TwitterStreaming() {
       val latitude: String  = if(status.getGeoLocation != null) status.getGeoLocation.getLatitude.toString else ""
       val longitude: String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
 
-      if(Util.areCoordinatesMandatory && status.getGeoLocation == null) return;
-
-      val tweet = new Tweet(username, location, timezone, createdAt, latitude, longitude, text)
-      Writer.write(s"\t${tweet.toXML.toString()}\n")
+      if(!Util.areCoordinatesMandatory || status.getGeoLocation != null) {
+        val tweet = new Tweet(username, location, timezone, createdAt, latitude, longitude, text)
+        Writer.write(s"\t${tweet.toXML.toString()}\n")
+      }
     }
 
     def onStallWarning(p1: StallWarning) {}

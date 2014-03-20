@@ -14,11 +14,12 @@ object FilterFactory {
 
   def createFilterQuery: FilterQuery = {
     val filterQuery = new FilterQuery()
-    Util.filterProperties.toArray.foreach[FilterQuery](property => {
-      if(property == Util.BoundingBoxesPropertyKey)
+    Util.filterProperties.toArray.foreach(property => {
+      if(property == Util.BoundingBoxesPropertyKey) {
         filterQuery.locations(Util.locations)
-      else
+      } else if(property == Util.LanguagePropertyKey) {
         filterQuery.language(Util.language).track(Util.stopWords)
+      }
     })
     filterQuery
   }

@@ -7,7 +7,8 @@ import scala.Array
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
-import scala.collection.mutable
+import scala.xml.XML
+import scala.collection.mutable.ListBuffer
 
 /**
  * Project: falcon
@@ -19,7 +20,7 @@ import scala.collection.mutable
 object Util {
 
   val LanguagePropertyKey      = "filter_language"
-  val BoundingBoxesPropertyKey = "filter_bounding_boxes"
+  val BoundingBoxesPropertyKey = "filter_bounding_boxes_file"
 
   private[this] val CoordinatesMandatoryPropertyKey = "coordinates_mandatory"
   private[this] val StopWordsFilePropertyKey        = "stop_words_file"
@@ -46,27 +47,33 @@ object Util {
       .build
   }
 
+  def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
   private[this] def stopWordsFile: String = {
     val properties = new Properties()
     properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
     properties.getProperty(StopWordsFilePropertyKey)
   }
-  def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
 
   def locations: Array[Array[Double]] = {
     val properties = new Properties()
     properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    val boundingBoxesString = properties.getProperty(BoundingBoxesPropertyKey)
+    val fileName = properties.getProperty(BoundingBoxesPropertyKey)
+    getBoundingBoxes(fileName)
+  }
 
-    val boundingBoxes = boundingBoxesString.split("@@")
-    val locations = Array.ofDim[Double](boundingBoxes.size, 2)
+  private[this] def getBoundingBoxes(fileName: String): Array[Array[Double]] = {
+    val root = XML.loadFile(fileName)
+    var boundingBoxes = new ListBuffer[Array[Double]]
+    (root \\ "boundingBox").foreach(b => {
+      val sw_long = (b \ "sw" \ "longitude").text
+      val sw_lat = (b \ "sw" \ "latitude").text
+      val ne_long = (b \ "ne" \ "longitude").text
+      val ne_lat = (b \ "ne" \ "latitude").text
 
-    boundingBoxes.indices.foreach(index => {
-      val coordinates = boundingBoxes(index).split(",")
-      locations(index) = Array(coordinates(0).toDouble, coordinates(1).toDouble)
+      boundingBoxes += Array(sw_long.toDouble, sw_lat.toDouble)
+      boundingBoxes += Array(ne_long.toDouble, ne_lat.toDouble)
     })
-
-    locations
+    boundingBoxes.toArray
   }
 
   def language:Array[String] = {
