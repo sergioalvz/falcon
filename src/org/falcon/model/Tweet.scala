@@ -9,13 +9,19 @@ import java.util.Date
  * Author: Sergio Álvarez
  * Date: 09/2013
  */
-class Tweet(username: String, location: String, timezone: String, createdAt:String, latitude: String,
+class Tweet(id:String, username: String, name:String, location: String, timezone: String, createdAt:String, latitude: String,
             longitude: String, text: String) {
   def toXML =
     <tweet>
+      <id>
+        {id}
+      </id>
       <username>
         {username}
       </username>
+      <name>
+        {name}
+      </name>
       <location>
         {location}
       </location>

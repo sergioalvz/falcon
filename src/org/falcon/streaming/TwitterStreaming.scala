@@ -4,7 +4,6 @@ import twitter4j._
 import org.falcon.model.Tweet
 import org.falcon.writer.Writer
 import org.falcon.util.Util
-import org.falcon.streaming.filter.FilterFactory
 import java.util.{Date, TimeZone}
 import java.text.SimpleDateFormat
 
@@ -31,16 +30,18 @@ class TwitterStreaming() {
 
   private def myTwitterStatusListener = new StatusListener {
     def onStatus(status: Status) {
-      val username: String  = status.getUser.getScreenName
-      val location: String  = status.getUser.getLocation
-      val timezone: String  = status.getUser.getTimeZone
-      val createdAt:String  = toUTC(status.getCreatedAt)
-      val text: String      = status.getText
-      val latitude: String  = if(status.getGeoLocation != null) status.getGeoLocation.getLatitude.toString else ""
-      val longitude: String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
+      val id:String        = status.getId.toString
+      val username:String  = status.getUser.getScreenName
+      val name:String      = status.getUser.getName
+      val location:String  = status.getUser.getLocation
+      val timezone:String  = status.getUser.getTimeZone
+      val createdAt:String = toUTC(status.getCreatedAt)
+      val text:String      = status.getText
+      val latitude:String  = if(status.getGeoLocation != null) status.getGeoLocation.getLatitude.toString else ""
+      val longitude:String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
 
       if(!Util.areCoordinatesMandatory || status.getGeoLocation != null) {
-        val tweet = new Tweet(username, location, timezone, createdAt, latitude, longitude, text)
+        val tweet = new Tweet(id, username, name, location, timezone, createdAt, latitude, longitude, text)
         Writer.write(s"\t${tweet.toXML.toString()}\n")
       }
     }
