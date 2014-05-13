@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
  * Author: Sergio Álvarez
  * Date: 09/2013
  */
-class TwitterStreaming() {
+ class TwitterStreaming() {
   private[this] var _filter: FilterQuery = _
   private[this] var _twitter: TwitterStream = _
 
@@ -41,8 +41,10 @@ class TwitterStreaming() {
       val longitude:String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
 
       if(!Util.areCoordinatesMandatory || status.getGeoLocation != null) {
-        val tweet = new Tweet(id, username, name, location, timezone, createdAt, latitude, longitude, text)
-        Writer.write(s"\t${tweet.toXML.toString()}\n")
+        if(isInBoundingBoxes(latitude, longitude)){
+          val tweet = new Tweet(id, username, name, location, timezone, createdAt, latitude, longitude, text)
+          Writer.write(s"\t${tweet.toXML.toString()}\n")
+        }
       }
     }
 
@@ -60,6 +62,19 @@ class TwitterStreaming() {
       val f = new SimpleDateFormat("yyyy-MM-dd HH:mm")
       f.setTimeZone(TimeZone.getTimeZone("UTC"))
       f.format(date)
+    }
+
+    private[this] def isInBoundingBoxes(latitude: String, longitude:String): Boolean = {
+      if(!Util.areBoundingBoxesProvided) return false
+
+      val lat = latitude.toDouble
+      val lng = longitude.toDouble
+
+      Util.locations.grouped(2).exists(group => {
+        val sw = group(0)
+        val ne = group(1)
+        sw(0) <= lat && ne(0) >= lat && sw(1) <= lng && ne(1) >= lng
+      })
     }
   }
 }

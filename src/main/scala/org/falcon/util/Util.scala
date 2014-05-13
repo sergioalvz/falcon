@@ -18,9 +18,10 @@ import scala.collection.mutable.ListBuffer
  * Date: 09/2013
  */
 object Util {
-
   val LanguagePropertyKey      = "filter_language"
   val BoundingBoxesPropertyKey = "filter_bounding_boxes_file"
+
+  private[this] val NO_PROPERTY_DEFINED             = "no_property_defined"
 
   private[this] val CoordinatesMandatoryPropertyKey = "coordinates_mandatory"
   private[this] val StopWordsFilePropertyKey        = "stop_words_file"
@@ -34,6 +35,8 @@ object Util {
   private[this] val ConsumerSecretPropertyKey       = "consumer_secret"
   private[this] val ConsumerKeyPropertyKey          = "consumer_key"
   private[this] val TwitterPropertiesFileName       = "/twitter.properties"
+
+  private[this] val theLocations: Array[Array[Double]] = null
 
   def twitterConfiguration: Configuration = {
     val properties = new Properties()
@@ -54,7 +57,17 @@ object Util {
     properties.getProperty(StopWordsFilePropertyKey)
   }
 
-  def locations: Array[Array[Double]] = {
+  def locations: Array[Array[Double]] = if(theLocations != null) theLocations else _locations
+
+  def areBoundingBoxesProvided: Boolean = {
+    val properties = new Properties()
+    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
+    val fileName = properties.getProperty(BoundingBoxesPropertyKey, NO_PROPERTY_DEFINED)
+
+    fileName != NO_PROPERTY_DEFINED
+  }
+
+  private[this] def _locations: Array[Array[Double]] = {
     val properties = new Properties()
     properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
     val fileName = properties.getProperty(BoundingBoxesPropertyKey)
