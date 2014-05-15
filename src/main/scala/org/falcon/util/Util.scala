@@ -1,7 +1,6 @@
 package org.falcon.util
 
 import java.util.Properties
-import twitter4j.conf.Configuration
 import scala.io.Source
 import scala.Array
 import scala.collection.JavaConverters._
@@ -9,6 +8,8 @@ import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
 import scala.xml.XML
 import scala.collection.mutable.ListBuffer
+
+import org.falcon.main.Configuration
 
 /**
  * Project: falcon
@@ -18,29 +19,19 @@ import scala.collection.mutable.ListBuffer
  * Date: 09/2013
  */
 object Util {
-  val LanguagePropertyKey      = "filter_language"
-  val BoundingBoxesPropertyKey = "filter_bounding_boxes_file"
-
-  private[this] val NO_PROPERTY_DEFINED             = "no_property_defined"
-
-  private[this] val CoordinatesMandatoryPropertyKey = "coordinates_mandatory"
-  private[this] val StopWordsFilePropertyKey        = "stop_words_file"
-  private[this] val TimeToCollectPropertyKey        = "time_to_collect"
-  private[this] val TimeInPropertyKey               = "time_in"
-  private[this] val FileNamePropertyKey             = "file_name"
-  private[this] val ConfigurationPropertiesFileName = "configuration.properties"
-
   private[this] val AccessTokenSecretPropertyKey    = "access_token_secret"
   private[this] val AccessTokenPropertyKey          = "access_token"
   private[this] val ConsumerSecretPropertyKey       = "consumer_secret"
   private[this] val ConsumerKeyPropertyKey          = "consumer_key"
-  private[this] val TwitterPropertiesFileName       = "/twitter.properties"
 
-  private[this] val theLocations: Array[Array[Double]] = null
+  private[this] val _locations: Array[Array[Double]] = null
+  private[this] var configuration: Configuration     = null
 
-  def twitterConfiguration: Configuration = {
+  def loadConfiguration(config: Configuration): Unit = this.configuration = config
+
+  def twitterConfiguration: twitter4j.conf.Configuration = {
     val properties = new Properties()
-    properties.load(Util.getClass.getResourceAsStream(TwitterPropertiesFileName))
+    properties.load(Source.fromFile(configuration.credentials).bufferedReader())
 
     new twitter4j.conf.ConfigurationBuilder()
       .setOAuthConsumerKey(properties.getProperty(ConsumerKeyPropertyKey))
@@ -50,32 +41,26 @@ object Util {
       .build
   }
 
-  def stopWords: Array[String] = Source.fromFile(stopWordsFile).getLines().toArray
-  private[this] def stopWordsFile: String = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    properties.getProperty(StopWordsFilePropertyKey)
+  def stopWords: Array[String] = Source.fromFile(configuration.stopWords).getLines().toArray
+
+  def locations: Array[Array[Double]] = if(_locations != null) _locations else getBoundingBoxes
+
+  def areBoundingBoxesProvided: Boolean = configuration.boundingBoxes != null
+
+  def language:Array[String] = Array(configuration.language)
+
+  def timeToCollect: Long = {
+    val timeMeasure = configuration.timeMeasure
+    val timeToCollect = configuration.timeToCollect
+    Duration(timeToCollect, TimeUnit.valueOf(timeMeasure)).toMillis
   }
 
-  def locations: Array[Array[Double]] = if(theLocations != null) theLocations else _locations
+  def fileName: String = configuration.output
 
-  def areBoundingBoxesProvided: Boolean = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    val fileName = properties.getProperty(BoundingBoxesPropertyKey, NO_PROPERTY_DEFINED)
+  def areCoordinatesMandatory: Boolean = configuration.coordinatesMandatory
 
-    fileName != NO_PROPERTY_DEFINED
-  }
-
-  private[this] def _locations: Array[Array[Double]] = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    val fileName = properties.getProperty(BoundingBoxesPropertyKey)
-    getBoundingBoxes(fileName)
-  }
-
-  private[this] def getBoundingBoxes(fileName: String): Array[Array[Double]] = {
-    val root = XML.loadFile(fileName)
+  private[this] def getBoundingBoxes: Array[Array[Double]] = {
+    val root = XML.loadFile(configuration.boundingBoxes)
     var boundingBoxes = new ListBuffer[Array[Double]]
     (root \\ "boundingBox").foreach(b => {
       val sw_long = (b \ "sw" \ "longitude").text
@@ -87,42 +72,5 @@ object Util {
       boundingBoxes += Array(ne_long.toDouble, ne_lat.toDouble)
     })
     boundingBoxes.toArray
-  }
-
-  def language:Array[String] = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    Array(properties.getProperty(LanguagePropertyKey))
-  }
-
-  def getExecutableAbsolutePath: String = {
-    val absolutePath = Util.getClass.getProtectionDomain.getCodeSource.getLocation.getPath
-    absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1)
-  }
-
-  def timeToCollect: Long = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    val timeMeasure = properties.getProperty(TimeInPropertyKey)
-    val timeToCollect = properties.getProperty(TimeToCollectPropertyKey).toDouble
-    Duration(timeToCollect, TimeUnit.valueOf(timeMeasure)).toMillis
-  }
-
-  def fileName: String = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    properties.getProperty(FileNamePropertyKey)
-  }
-
-  def filterProperties: Set[String] = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    properties.stringPropertyNames.asScala.filter(property => property.startsWith("filter_")).toSet
-  }
-
-  def areCoordinatesMandatory: Boolean = {
-    val properties = new Properties()
-    properties.load(Source.fromFile(getExecutableAbsolutePath + ConfigurationPropertiesFileName).bufferedReader())
-    properties.getProperty(CoordinatesMandatoryPropertyKey) == "true"
   }
 }

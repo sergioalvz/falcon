@@ -1,0 +1,30 @@
+package org.falcon.main
+
+import java.io.File
+
+case class Configuration(language:String = "es", stopWords:File = null, boundingBoxes:File = null, timeMeasure:String = "SECONDS",
+    timeToCollect:Int = 10, output:String = "falcon_collection.xml", coordinatesMandatory:Boolean = false, credentials:File = null) {}
+
+object CLIParser {
+  private[this] val parser = new scopt.OptionParser[Configuration]("Falcon") {
+    head("Falcon", "1.0")
+    opt[String]('l', "language")
+      .required() action { (x, c) => c.copy(language = x) } text("Specifies the language, in ISO 639-1 format, for the tweets to collect.")
+    opt[File]('s', "stopwords")
+      .required() action { (x, c) => c.copy(stopWords = x) } text("Specifies the file for the stopwords.")
+    opt[String]('t', "time-in")
+      .required() action { (x, c) => c.copy(timeMeasure = x) } text("The time measure for collecting tweets (SECONDS, MINUTES, HOURS, DAYS).")
+    opt[Int]('n', "timestamp")
+      .required() action { (x, c) => c.copy(timeToCollect = x) } text("Units of time for collecting tweets.")
+    opt[String]('o', "output")
+      .required() action { (x, c) => c.copy(output = x) } text("The output filename where store the collection results.")
+    opt[File]('c', "credentials")
+      .required() action { (x, c) => c.copy(credentials = x) } text("Properties file with the Twitter credentials")
+    opt[Boolean]("coordinates-mandatory")
+      .action { (x, c) => c.copy(coordinatesMandatory = x) } text("Indicates whether every tweet must have a geolocation tag associated or not.")
+    opt[File]('b', "bounding-boxes")
+      .action { (x, c) => c.copy(boundingBoxes = x) } text ("Specifies the file which contains the bounding boxes.")
+  }
+
+  def parse(args:Array[String], conf:Configuration):Option[Configuration] = this.parser.parse(args, conf)
+}
