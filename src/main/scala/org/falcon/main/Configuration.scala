@@ -20,8 +20,8 @@ object CLIParser {
       .required() action { (x, c) => c.copy(output = x) } text("The output filename where store the collection results.")
     opt[File]('c', "credentials")
       .required() action { (x, c) => c.copy(credentials = x) } text("Properties file with the Twitter credentials")
-    opt[Boolean]("coordinates-mandatory")
-      .action { (x, c) => c.copy(coordinatesMandatory = x) } text("Indicates whether every tweet must have a geolocation tag associated or not.")
+    opt[Unit]("coordinates-mandatory")
+      .action { (x, c) => c.copy(coordinatesMandatory = true) } text("This flag indicates whether every tweet must have a geolocation tag associated or not.")
     opt[File]('b', "bounding-boxes")
       .action { (x, c) => c.copy(boundingBoxes = x) } text ("Specifies the file which contains the bounding boxes.")
   }
