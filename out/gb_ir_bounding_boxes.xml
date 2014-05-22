@@ -1,0 +1,32 @@
+<boundingBoxes>
+  <boundingBox>
+    <sw>
+      <latitude>49.85</latitude>
+      <longitude>-10.94</longitude>
+    </sw>
+    <ne>
+      <latitude>61.09</latitude>
+      <longitude>-0.58</longitude>
+    </ne>
+  </boundingBox>
+  <boundingBox>
+    <sw>
+      <latitude>51.18</latitude>
+      <longitude>-1.05</longitude>
+    </sw>
+    <ne>
+      <latitude>54.72</latitude>
+      <longitude>1.89</longitude>
+    </ne>
+  </boundingBox>
+  <boundingBox>
+    <sw>
+      <latitude>50.66</latitude>
+      <longitude>-1.45</longitude>
+    </sw>
+    <ne>
+      <latitude>51.58</latitude>
+      <longitude>1.51</longitude>
+    </ne>
+  </boundingBox>
+</boundingBoxes>

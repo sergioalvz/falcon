@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat
 
   private def myTwitterStatusListener = new StatusListener {
     def onStatus(status: Status) {
+      if(status.getGeoLocation == null) return;
+
       val id:String        = status.getId.toString
       val username:String  = status.getUser.getScreenName
       val name:String      = status.getUser.getName
@@ -37,14 +39,12 @@ import java.text.SimpleDateFormat
       val timezone:String  = status.getUser.getTimeZone
       val createdAt:String = toUTC(status.getCreatedAt)
       val text:String      = status.getText
-      val latitude:String  = if(status.getGeoLocation != null) status.getGeoLocation.getLatitude.toString else ""
-      val longitude:String = if(status.getGeoLocation != null) status.getGeoLocation.getLongitude.toString else ""
+      val latitude:String  = status.getGeoLocation.getLatitude.toString
+      val longitude:String = status.getGeoLocation.getLongitude.toString
 
-      if(!Util.areCoordinatesMandatory || status.getGeoLocation != null) {
-        if(isInBoundingBoxes(latitude, longitude)){
-          val tweet = new Tweet(id, username, name, location, timezone, createdAt, latitude, longitude, text)
-          Writer.write(s"\t${tweet.toXML.toString()}\n")
-        }
+      if(Util.isInBoundingBoxes(latitude, longitude)){
+        val tweet = new Tweet(id, username, name, location, timezone, createdAt, latitude, longitude, text)
+        Writer.write(s"\t${tweet.toXML.toString()}\n")
       }
     }
 
@@ -62,19 +62,6 @@ import java.text.SimpleDateFormat
       val f = new SimpleDateFormat("yyyy-MM-dd HH:mm")
       f.setTimeZone(TimeZone.getTimeZone("UTC"))
       f.format(date)
-    }
-
-    private[this] def isInBoundingBoxes(latitude: String, longitude:String): Boolean = {
-      if(!Util.areBoundingBoxesProvided) return false
-
-      val lat = latitude.toDouble
-      val lng = longitude.toDouble
-
-      Util.locations.grouped(2).exists(group => {
-        val sw = group(0)
-        val ne = group(1)
-        sw(0) <= lat && ne(0) >= lat && sw(1) <= lng && ne(1) >= lng
-      })
     }
   }
 }

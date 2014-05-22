@@ -45,9 +45,7 @@ object Util {
 
   def locations: Array[Array[Double]] = if(_locations != null) _locations else getBoundingBoxes
 
-  def areBoundingBoxesProvided: Boolean = configuration.boundingBoxes != null
-
-  def language:Array[String] = Array(configuration.language)
+  def language: Array[String] = Array(configuration.language)
 
   def timeToCollect: Long = {
     val timeMeasure = configuration.timeMeasure
@@ -59,6 +57,17 @@ object Util {
 
   def areCoordinatesMandatory: Boolean = configuration.coordinatesMandatory
 
+  def isInBoundingBoxes(latitude: String, longitude: String): Boolean = {
+    val lat = latitude.toDouble
+    val lng = longitude.toDouble
+
+    Util.locations.grouped(2).exists(group => {
+      val sw = group(0)
+      val ne = group(1)
+      sw(0) <= lat && ne(0) >= lat && sw(1) <= lng && ne(1) >= lng
+    })
+  }
+
   private[this] def getBoundingBoxes: Array[Array[Double]] = {
     val root = XML.loadFile(configuration.boundingBoxes)
     var boundingBoxes = new ListBuffer[Array[Double]]
@@ -68,8 +77,8 @@ object Util {
       val ne_long = (b \ "ne" \ "longitude").text
       val ne_lat = (b \ "ne" \ "latitude").text
 
-      boundingBoxes += Array(sw_long.toDouble, sw_lat.toDouble)
-      boundingBoxes += Array(ne_long.toDouble, ne_lat.toDouble)
+      boundingBoxes += Array(sw_lat.toDouble, sw_long.toDouble)
+      boundingBoxes += Array(ne_lat.toDouble, ne_long.toDouble)
     })
     boundingBoxes.toArray
   }
