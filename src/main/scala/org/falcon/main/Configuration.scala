@@ -2,7 +2,7 @@ package org.falcon.main
 
 import java.io.File
 
-case class Configuration(language:String = "es", stopWords:File = null, boundingBoxes:File = null, timeMeasure:String = "SECONDS",
+case class Configuration(language:String = "es", keywords:File = null, boundingBoxes:File = null, timeMeasure:String = "SECONDS",
     timeToCollect:Int = 10, output:String = "falcon_collection.xml", coordinatesMandatory:Boolean = false, credentials:File = null) {}
 
 object CLIParser {
@@ -10,8 +10,8 @@ object CLIParser {
     head("Falcon", "1.0")
     opt[String]('l', "language")
       .required() action { (x, c) => c.copy(language = x) } text("Specifies the language, in ISO 639-1 format, for the tweets to collect.")
-    opt[File]('s', "stopwords")
-      .required() action { (x, c) => c.copy(stopWords = x) } text("Specifies the file for the stopwords.")
+    opt[File]('k', "keywords")
+      .required() action { (x, c) => c.copy(keywords = x) } text("Specifies the file for the keywords.")
     opt[String]('t', "time-in")
       .required() action { (x, c) => c.copy(timeMeasure = x) } text("The time measure for collecting tweets (SECONDS, MINUTES, HOURS, DAYS).")
     opt[Int]('n', "timestamp")

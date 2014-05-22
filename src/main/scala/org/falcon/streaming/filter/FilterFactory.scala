@@ -11,5 +11,5 @@ import org.falcon.util.Util
  * Date: 02/2014
 */
 object FilterFactory {
-  def createFilterQuery: FilterQuery = new FilterQuery().language(Util.language).track(Util.stopWords)
+  def createFilterQuery: FilterQuery = new FilterQuery().language(Util.language).track(Util.keywords)
 }

@@ -41,7 +41,7 @@ object Util {
       .build
   }
 
-  def stopWords: Array[String] = Source.fromFile(configuration.stopWords).getLines().toArray
+  def keywords: Array[String] = Source.fromFile(configuration.keywords).getLines().toArray
 
   def locations: Array[Array[Double]] = if(_locations != null) _locations else getBoundingBoxes
 
